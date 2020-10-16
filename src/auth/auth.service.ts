@@ -15,11 +15,11 @@ export class AuthService {
     }
 
     async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-        const {username, password} = authCredentialsDto;
+        const {username, email, password} = authCredentialsDto;
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = new this.userModel({username, password: hashedPassword});
+        const user = new this.userModel({username, email, password: hashedPassword});
 
         try {
             await user.save();
@@ -33,6 +33,8 @@ export class AuthService {
 
     async signIn(user: User) {
         const payload = {username: user.username, sub: user._id};
+        // localStorage.setItem('user', user.username);
+        // localStorage.setItem('token', this.jwtService.sign(payload));
         return {
             accessToken: this.jwtService.sign(payload),
         };
