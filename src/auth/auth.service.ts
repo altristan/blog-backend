@@ -2,9 +2,10 @@ import {ConflictException, Injectable} from '@nestjs/common';
 import {InjectModel} from "@nestjs/mongoose";
 import {User} from "./interfaces/user.interface";
 import {Model} from "mongoose";
-import {AuthCredentialsDto} from "./dto/auth-credentials.dto";
+import {RegisterDto} from "./dto/register.dto";
 import * as bcrypt from 'bcrypt';
 import {JwtService} from "@nestjs/jwt";
+import TokenPayload from "./interfaces/tokenPayload.interface";
 
 @Injectable()
 export class AuthService {
@@ -14,8 +15,8 @@ export class AuthService {
     ) {
     }
 
-    async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-        const {username, email, password} = authCredentialsDto;
+    async signUp(registerDto: RegisterDto): Promise<void> {
+        const {username, email, password} = registerDto;
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -25,16 +26,15 @@ export class AuthService {
             await user.save();
         } catch (err) {
             if (err.code === 11000) {
-                throw new ConflictException('User already exists');
+                throw new ConflictException('User/email already exists');
             }
             throw err;
         }
     }
 
     async signIn(user: User) {
-        const payload = {username: user.username, sub: user._id};
-        // localStorage.setItem('user', user.username);
-        // localStorage.setItem('token', this.jwtService.sign(payload));
+        // console.log(user);
+        const payload = {sub: user._id};
         return {
             accessToken: this.jwtService.sign(payload),
         };
@@ -42,6 +42,7 @@ export class AuthService {
 
     async validateUser(username: string, pass: string): Promise<User> {
         const user = await this.userModel.findOne({username});
+        // console.log(user);
 
         if (!user) {
             return null;
@@ -54,5 +55,36 @@ export class AuthService {
         }
 
         return null;
+    }
+
+    async getUser(userID: string): Promise<User> {
+        const user = await this.userModel.findById(userID).exec();
+
+        console.log(user);
+        return user;
+    }
+
+    public getCookieWithJwtAccessToken(userId: number) {
+        const payload: TokenPayload = {userId};
+        const token = this.jwtService.sign(payload, {
+            secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+            expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME
+        })
+        return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${
+            process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME}`;
+    }
+
+    public getCookieWithJwtRefreshToken(userId: number) {
+        const payload: TokenPayload = { userId };
+        const token = this.jwtService.sign(payload, {
+            secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+            expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME
+        });
+        const cookie = `Refresh=${token}; HttpOnly; Path=/; Max-Age=${
+            process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`;
+        return {
+            cookie,
+            token
+        }
     }
 }

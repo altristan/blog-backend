@@ -10,4 +10,5 @@ export const UserSchema = new mongoose.Schema({
         unique: true,
     },
     password: String,
+    refreshToken: String,
 });

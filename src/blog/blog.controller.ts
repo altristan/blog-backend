@@ -24,7 +24,7 @@ export class BlogController {
     }
 
     // Submit a post
-    // @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Post('/post')
     async addPost(@Res() res, @Body() createPostDTO: CreatePostDTO) {
         const newPost = await this.blogService.addPost(createPostDTO);
@@ -32,9 +32,9 @@ export class BlogController {
             message: 'Post has been submitted successfully!',
             post: newPost,
         });
-    }
+    } //TODO: before posting, user should be identified first
 
-    // @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Put('/edit')
     async editPost(
         @Res() res,
@@ -52,7 +52,7 @@ export class BlogController {
     }
 
     // Delete a post using ID
-    // @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     @Delete('/delete')
     async deletePost(@Res() res, @Query('postID', new ValidateObjectId()) postID) {
         const deletedPost = await this.blogService.deletePost(postID);
@@ -77,7 +77,6 @@ export class BlogController {
     }
 
     // Fetch all posts
-    // @UseGuards(JwtAuthGuard)
     @Get('posts')
     async getPosts(@Res() res) {
         const posts = await this.blogService.getPosts();

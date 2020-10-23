@@ -1,6 +1,6 @@
 import {IsEmail, IsString, MaxLength, MinLength} from 'class-validator';
 
-export class AuthCredentialsDto {
+export class RegisterDto {
     @IsString()
     @MinLength(4)
     @MaxLength(20)
@@ -14,3 +14,5 @@ export class AuthCredentialsDto {
     @MaxLength(20, { message: 'Password is too long (20 characters max)' })
     password: string;
 }
+
+export default RegisterDto;

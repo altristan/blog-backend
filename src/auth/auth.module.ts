@@ -14,9 +14,11 @@ import {JwtStrategy} from "./strategies/jwt-auth.strategy";
         ConfigModule.forRoot(),
         MongooseModule.forFeature([{name: 'User', schema: UserSchema}]),
         PassportModule,
+        // JwtModule.register({}),
         JwtModule.register({
-            secret: process.env.JWT_SECRET,
-            signOptions: {expiresIn: '60s'},
+            secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+            signOptions: {
+                expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME},
         }),
     ],
     providers: [AuthService, LocalStrategy, JwtStrategy],
