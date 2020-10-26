@@ -57,11 +57,17 @@ export class AuthService {
         return null;
     }
 
-    async getUser(userID: string): Promise<User> {
+    async getUser(userID: string): Promise<any> {
         const user = await this.userModel.findById(userID).exec();
 
-        console.log(user);
-        return user;
+        // console.log(user);
+        return {user: user.username, email: user.email};
+    }
+
+    async getUsers(): Promise<any> {
+        const users = await this.userModel.find().exec();
+        console.log(users);
+        return users;
     }
 
     public getCookieWithJwtAccessToken(userId: number) {

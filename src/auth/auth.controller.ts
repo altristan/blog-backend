@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Post, Request, UseGuards, ValidationPipe} from '@nestjs/common';
+import {Body, Controller, Get, HttpStatus, Post, Request, Res, UseGuards, ValidationPipe} from '@nestjs/common';
 import {AuthService} from "./auth.service";
 import {RegisterDto} from "./dto/register.dto";
 import {LocalAuthGuard} from "./guards/local-auth.guard";
@@ -26,5 +26,12 @@ export class AuthController {
     @Post('/me')
     getMe(@Request() req) {
         return this.authService.getUser(req.user);
+    }
+
+    // Fetch all users
+    @Get('users')
+    async getPosts(@Res() res) {
+        const posts = await this.authService.getUsers();
+        return res.status(HttpStatus.OK).json(posts);
     }
 }
